@@ -20,7 +20,8 @@ const articleSchema = new mongoose.Schema({
   summary: String,
   pubDate: Date,
   topic: String,
-  source: String
+  source: String,
+  image: String
 });
 const Article = mongoose.model('Article', articleSchema);
 
@@ -40,7 +41,8 @@ async function fetchAllFeeds() {
             summary: item.contentSnippet || item.content || '',
             pubDate: item.isoDate ? new Date(item.isoDate) : new Date(),
             topic: feed.topic,
-            source: new URL(feed.url).hostname
+            source: new URL(feed.url).hostname,
+	    image: item.enclosure?.url || item['media:content']?.url || null
           },
           { upsert: true }
         );
