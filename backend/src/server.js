@@ -21,7 +21,7 @@ const articleSchema = new mongoose.Schema({
   pubDate: Date,
   topic: String,
   source: String,
-  image: String
+  fullText: String,  // Add this line for storing extracted full text
 });
 const Article = mongoose.model('Article', articleSchema);
 
@@ -58,11 +58,29 @@ async function fetchAllFeeds() {
 cron.schedule('*/15 * * * *', fetchAllFeeds);
 
 // API endpoint
-app.get('/api/articles', async (req, res) => {
-  const topics = req.query.topics ? req.query.topics.split(',') : [];
-  const query = topics.length > 0 ? { topic: { $in: topics } } : {};
-  const articles = await Article.find(query).sort({ pubDate: -1 }).limit(50);
-  res.json(articles);
+// Require the utility at the top of server.js (add with other requires)
+const { getFullArticleText } = require('./utils/getFullText');
+
+// New endpoint for fetching full text
+app.get('/api/full-article/:id', async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id);
+    if (!article) return res.status(404).json({ error: 'Article not found' });
+
+    if (article.fullText) {
+      return res.json({ fullText: article.fullText });
+    }
+
+    const fullText = await getFullArticleText(article.link);
+    if (fullText) {
+      article.fullText = fullText;
+      await article.save();
+    }
+
+    res.json({ fullText: fullText || 'Full text not available for this article.' });
+  } catch (e) {
+    res.status(500).json({ error: 'Error fetching full text' });
+  }
 });
 
 const PORT = process.env.PORT || 5000;

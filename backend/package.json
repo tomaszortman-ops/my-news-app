@@ -7,12 +7,15 @@
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "jsdom": "^27.3.0",
     "mongoose": "^8.7.2",
     "node-cron": "^3.0.3",
+    "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0"
   }
 }
